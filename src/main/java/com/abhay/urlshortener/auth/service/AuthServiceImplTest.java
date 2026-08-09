@@ -19,7 +19,6 @@ import com.abhay.urlshortener.auth.dto.request.RegisterRequest;
 import com.abhay.urlshortener.auth.dto.response.RegisterResponse;
 import com.abhay.urlshortener.auth.mapper.UserMapper;
 import com.abhay.urlshortener.common.entity.User;
-import com.abhay.urlshortener.auth.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
@@ -32,6 +31,9 @@ class AuthServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private JwtService jwtService;
 
     @InjectMocks
     private AuthServiceImpl authService;

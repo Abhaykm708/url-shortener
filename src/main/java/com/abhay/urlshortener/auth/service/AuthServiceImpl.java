@@ -11,6 +11,7 @@ import com.abhay.urlshortener.common.entity.User;
 import com.abhay.urlshortener.common.exception.EmailAlreadyExistsException;
 import com.abhay.urlshortener.common.exception.InvalidCredentialsException;
 import com.abhay.urlshortener.common.exception.PasswordMismatchException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +21,16 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder) {
+    @Value("${jwt.expiration}")
+    private long expiration;
+
+    public AuthServiceImpl(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -62,5 +68,13 @@ public class AuthServiceImpl implements AuthService {
                     "Invalid email or password"
             );
         }
+
+        String token=jwtService.generateToken(user);
+
+        return new LoginResponse(
+                token,
+                "Bearer",
+                expiration/1000
+        );
     }
 }
