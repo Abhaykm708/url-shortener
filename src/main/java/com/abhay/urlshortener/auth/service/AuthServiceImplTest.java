@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+import com.abhay.urlshortener.auth.dto.request.LoginRequest;
+import com.abhay.urlshortener.auth.dto.response.LoginResponse;
 import com.abhay.urlshortener.auth.repository.UserRepository;
+import com.abhay.urlshortener.common.entity.Role;
 import com.abhay.urlshortener.common.exception.EmailAlreadyExistsException;
 import com.abhay.urlshortener.common.exception.PasswordMismatchException;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +22,8 @@ import com.abhay.urlshortener.auth.dto.request.RegisterRequest;
 import com.abhay.urlshortener.auth.dto.response.RegisterResponse;
 import com.abhay.urlshortener.auth.mapper.UserMapper;
 import com.abhay.urlshortener.common.entity.User;
+
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
@@ -118,5 +123,48 @@ class AuthServiceImplTest {
 
         verify(userRepository).existsByEmail(request.getEmail());
         verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void login_shuoldReturnResponseWhenCredentialsValid() {
+
+        LoginRequest loginRequest=new LoginRequest();
+        loginRequest.setEmail("abhay@test.com");
+        loginRequest.setPassword("Abhay@123");
+
+        User user=new User();
+        user.setId(1L);
+        user.setEmail("abhay@test.com");
+        user.setPassword("$2a$10$stored-password-hash");
+        user.setRole(Role.USER);
+
+        when(userRepository.findByEmail(loginRequest.getEmail()))
+                .thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches(
+                loginRequest.getPassword(),
+                user.getPassword()
+        ))
+                .thenReturn(true);
+
+        when(jwtService.generateToken(user))
+                .thenReturn("test-jwt-token");
+
+        authService.setExpiration(3600000L);
+
+        LoginResponse response=authService.login(loginRequest);
+
+        assertEquals("test-jwt-token", response.getAccessToken());
+        assertEquals("Bearer", response.getTokenType());
+        assertEquals(3600, response.getExpiresIn());
+
+        verify(userRepository).findByEmail(loginRequest.getEmail());
+
+        verify(passwordEncoder).matches(
+                loginRequest.getPassword(),
+                user.getPassword()
+        );
+
+        verify(jwtService).generateToken(user);
     }
 }

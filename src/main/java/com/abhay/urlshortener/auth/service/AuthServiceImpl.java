@@ -77,4 +77,8 @@ public class AuthServiceImpl implements AuthService {
                 expiration/1000
         );
     }
+
+    void setExpiration(long expiration) {
+        this.expiration=expiration;
+    }
 }

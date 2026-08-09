@@ -1,6 +1,8 @@
 package com.abhay.urlshortener.auth.controller;
 
+import com.abhay.urlshortener.auth.dto.request.LoginRequest;
 import com.abhay.urlshortener.auth.dto.request.RegisterRequest;
+import com.abhay.urlshortener.auth.dto.response.LoginResponse;
 import com.abhay.urlshortener.auth.dto.response.RegisterResponse;
 import com.abhay.urlshortener.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -29,5 +31,14 @@ public class AuthController {
         RegisterResponse response=authService.register(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(
+            @Valid @RequestBody LoginRequest request) {
+
+        LoginResponse response=authService.login(request);
+
+        return ResponseEntity.ok(response);
     }
 }
