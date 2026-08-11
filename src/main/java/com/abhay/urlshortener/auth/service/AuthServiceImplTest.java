@@ -9,6 +9,7 @@ import com.abhay.urlshortener.auth.dto.response.LoginResponse;
 import com.abhay.urlshortener.auth.repository.UserRepository;
 import com.abhay.urlshortener.common.entity.Role;
 import com.abhay.urlshortener.common.exception.EmailAlreadyExistsException;
+import com.abhay.urlshortener.common.exception.InvalidCredentialsException;
 import com.abhay.urlshortener.common.exception.PasswordMismatchException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -166,5 +167,81 @@ class AuthServiceImplTest {
         );
 
         verify(jwtService).generateToken(user);
+    }
+
+    @Test
+    void login_shouldThrowExceptionWhenEmailDoesNotExist() {
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("notfound@test.com");
+        loginRequest.setPassword("Abhay@123");
+
+        when(userRepository.findByEmail(loginRequest.getEmail()))
+                .thenReturn(Optional.empty());
+
+        InvalidCredentialsException exception =
+                assertThrows(
+                        InvalidCredentialsException.class,
+                        () -> authService.login(loginRequest)
+                );
+
+        assertEquals(
+                "Invalid email or password.",
+                exception.getMessage()
+        );
+
+        verify(userRepository)
+                .findByEmail(loginRequest.getEmail());
+
+        verify(passwordEncoder, never())
+                .matches(anyString(), anyString());
+
+        verify(jwtService, never())
+                .generateToken(any(User.class));
+    }
+
+    @Test
+    void login_shouldThrowExceptionWhenPasswordIsWrong() {
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("abhay@test.com");
+        loginRequest.setPassword("WrongPassword");
+
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("abhay@test.com");
+        user.setPassword("$2a$10$stored-password-hash");
+        user.setRole(Role.USER);
+
+        when(userRepository.findByEmail(loginRequest.getEmail()))
+                .thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches(
+                loginRequest.getPassword(),
+                user.getPassword()
+        )).thenReturn(false);
+
+        InvalidCredentialsException exception =
+                assertThrows(
+                        InvalidCredentialsException.class,
+                        () -> authService.login(loginRequest)
+                );
+
+        assertEquals(
+                "Invalid email or password",
+                exception.getMessage()
+        );
+
+        verify(userRepository)
+                .findByEmail(loginRequest.getEmail());
+
+        verify(passwordEncoder)
+                .matches(
+                        loginRequest.getPassword(),
+                        user.getPassword()
+                );
+
+        verify(jwtService, never())
+                .generateToken(any(User.class));
     }
 }
