@@ -13,7 +13,7 @@ public class CreateShortUrlRequest {
     @NotBlank(message = "Url is required")
     @Size(max = 2048, message = "Url must not exceed 2048 Characters")
     @Pattern(
-            regexp = "^(http?://).+",
+            regexp = "^(https?://).+",
             message = "Url must be start with http:// or https://"
     )
     private String originalUrl;

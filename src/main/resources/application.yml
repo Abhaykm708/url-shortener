@@ -23,3 +23,8 @@ server:
 jwt:
   secret: change-this-development-secret-key-which-is-enough-long
   expiration: 3600000
+
+  data:
+    redis:
+      host: localhost
+      port: 6379

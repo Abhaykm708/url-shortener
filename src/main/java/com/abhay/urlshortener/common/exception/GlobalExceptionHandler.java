@@ -1,6 +1,7 @@
 package com.abhay.urlshortener.common.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -53,5 +54,31 @@ public class GlobalExceptionHandler {
                 HttpStatus.UNAUTHORIZED.value(),
                 exception.getMessage()
         );
+    }
+
+    @ExceptionHandler(ShortUrlNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleShortCodeNotFound(ShortUrlNotFoundException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(
+                        new ErrorResponse(
+                                HttpStatus.NOT_FOUND.value(),
+                                exception.getMessage()
+                        )
+                );
+    }
+
+    @ExceptionHandler(ShortUrlExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleShortUrlExpiredException(ShortUrlExpiredException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.GONE)
+                .body(
+                        new ErrorResponse(
+                                HttpStatus.GONE.value(),
+                                exception.getMessage()
+                        )
+                );
     }
 }
