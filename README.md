@@ -90,8 +90,8 @@ Redis Cache
 
 # Authentication
   ## Authentication endpoints:
-  POST /api/v1/auth/register
-  POST /api/v1/auth/login
+  1. POST /api/v1/auth/register
+  2. POST /api/v1/auth/login
 
   ## Protected endpoint require:
   Authorization: Bearer <JWT_TOKEN>
@@ -145,9 +145,9 @@ Following tool need to installed:
 
 # 👨‍💻 Author
 Abhay Kumar
-GitHub: https://github.com/Abhaykm708
-LinkedIn: https://linkedin.com/in/abhay-kumar7
-LeetCode: https://leetcode.com/Abhaykm70
+1. GitHub: https://github.com/Abhaykm708
+2. LinkedIn: https://linkedin.com/in/abhay-kumar7
+3. LeetCode: https://leetcode.com/Abhaykm70
 
 # 📄 License
 This project is licensed under the MIT License.t
