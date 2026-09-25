@@ -31,3 +31,19 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OS ###
+.DS_Store
+.Thumbs_db
+
+### Environments/Secret ###
+.env
+.env.*
+!.env.example
+
+### Logs ###
+*.log
+
+### Local Configuration ###
+appliaction-local.yml
+application-local.yaml

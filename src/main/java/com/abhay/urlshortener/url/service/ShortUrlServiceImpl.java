@@ -8,6 +8,8 @@ import com.abhay.urlshortener.url.dto.request.CreateShortUrlRequest;
 import com.abhay.urlshortener.url.dto.response.CreateShortUrlResponse;
 import com.abhay.urlshortener.url.entity.ShortUrl;
 import com.abhay.urlshortener.url.repository.ShortUrlRepository;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,10 +20,12 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
     private final ShortUrlRepository shortUrlRepository;
     private final UserRepository userRepository;
+    private final StringRedisTemplate redisTemplate;
 
-    public ShortUrlServiceImpl(ShortUrlRepository shortUrlRepository, UserRepository userRepository) {
+    public ShortUrlServiceImpl(ShortUrlRepository shortUrlRepository, UserRepository userRepository, StringRedisTemplate redisTemplate) {
         this.shortUrlRepository = shortUrlRepository;
         this.userRepository = userRepository;
+        this.redisTemplate = redisTemplate;
     }
 
 
@@ -61,6 +65,18 @@ public class ShortUrlServiceImpl implements ShortUrlService {
     @Override
     public String getOriginalUrl(String shortCode) {
 
+        String key= "url:" + shortCode;
+
+        ValueOperations<String, String> valueOperations=
+                redisTemplate.opsForValue();
+
+        String cachedUrl=valueOperations
+                .get(key);
+
+        if(cachedUrl != null) {
+            return cachedUrl;
+        }
+
         ShortUrl shortUrl=shortUrlRepository
                 .findByShortCode(shortCode)
                 .orElseThrow(() ->
@@ -75,6 +91,11 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         shortUrl.setClickCount(shortUrl.getClickCount()+1);
 
         shortUrlRepository.save(shortUrl);
+
+        valueOperations.set(
+                key,
+                shortUrl.getOriginalUrl()
+        );
 
         return shortUrl.getOriginalUrl();
     }
